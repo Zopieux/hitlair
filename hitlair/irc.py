@@ -6,12 +6,12 @@ import os
 import irc3
 from irc3.plugins.command import command
 
-from hitler import game
-from hitler.game import Player
-from hitler.irc_util import encode_modes
+from hitlair import game
+from hitlair.game import Player
+from hitlair.irc_util import encode_modes
 
-SELF_MODULE = 'hitler.irc'
-CHANNEL = '##dieses-fn'
+SELF_MODULE = "hitler.irc"
+CHANNEL = "##dieses-fn"
 
 
 def ignore_wrong_channel(f):
@@ -39,9 +39,9 @@ class SecretHitlerPlugin:
         self.game = game.State()
 
     requires = [
-        'irc3.plugins.core',
-        'irc3.plugins.userlist',
-        'irc3.plugins.command',
+        "irc3.plugins.core",
+        "irc3.plugins.userlist",
+        "irc3.plugins.command",
     ]
 
     @classmethod
@@ -99,7 +99,7 @@ class SecretHitlerPlugin:
         nick = mask.nick
         try:
             self.game.add_player(Player(nick))
-            self.mode(('+v', nick))
+            self.mode(("+v", nick))
             self.send(f"{nick}: HEIL DAS IST GUT")
         except game.Error:
             self.send(f"{nick}: ASH DAS IST KEINE POßIBL")
@@ -115,7 +115,7 @@ class SecretHitlerPlugin:
         nick = mask.nick
         try:
             self.game.remove_player(Player(nick))
-            self.mode(('-v', nick))
+            self.mode(("-v", nick))
             self.send(f"{nick}: NEIN :'(")
         except game.Error:
             self.send(f"{nick}: ASH DAS IST KEINE POßIBL")
@@ -142,9 +142,13 @@ class SecretHitlerPlugin:
                     }[event.player.role]
                     self.send_private(event.player.name, f"FYI tu es {role}")
                 if isinstance(event, game.PresidentChanges):
-                    self.send(f"Le président a été choisi au hasard, c'est {event.new_president.name} !")
+                    self.send(
+                        f"Le président a été choisi au hasard, c'est {event.new_president.name} !"
+                    )
             if stage is game.Stage.nominate_chancellor:
-                self.send(f"Le président ({event.new_president.name}) doit choisir un chancelier. Annonces votre choix avec !chancelor <joueur>")
+                self.send(
+                    f"Le président ({event.new_president.name}) doit choisir un chancelier. Annonces votre choix avec !chancelor <joueur>"
+                )
             else:
                 raise game.Error("wtf")
         except game.Error as e:
@@ -164,11 +168,15 @@ class SecretHitlerPlugin:
             events, stage = self.game.advance()
             for event in events:
                 if isinstance(event, game.PresidentNominates):
-                    self.send(f"Le choix du président se porte sur {event.candidate_chancellor.name} comme chancelier.")
+                    self.send(
+                        f"Le choix du président se porte sur {event.candidate_chancellor.name} comme chancelier."
+                    )
                 else:
                     raise game.Error("wat")
             if stage is game.Stage.chancellor_election:
-                self.send(f"Approuvez-vous ce choix ? Votez avec /query {self.bot.nick} !oui / !non.")
+                self.send(
+                    f"Approuvez-vous ce choix ? Votez avec /query {self.bot.nick} !oui / !non."
+                )
             else:
                 raise game.Error("wtf")
         except game.Error as e:
@@ -210,8 +218,8 @@ class SecretHitlerPlugin:
 
             %%x <data>...
         """
-        data = ' '.join(args['<data>'])
-        self.send(repr(eval(data, {'self': self, 'game': game, 'g': self.game})))
+        data = " ".join(args["<data>"])
+        self.send(repr(eval(data, {"self": self, "game": game, "g": self.game})))
 
     @command
     def reloadpls(self, mask, target, args):
@@ -222,7 +230,7 @@ class SecretHitlerPlugin:
         self.bot.reload(SELF_MODULE)
 
     def setup_lobby(self):
-        self.mode('-m', *(('-v', m) for m in self.users.modes['+']))
+        self.mode("-m", *(("-v", m) for m in self.users.modes["+"]))
         self.state = State.ready
         self.send("MY BODY IS READY")
 
@@ -237,26 +245,25 @@ class SecretHitlerPlugin:
         self.bot.privmsg(CHANNEL, "WAIT FOR IT…")
         while True:
             await asyncio.sleep(1)
-            if self.bot.nick in self.users.modes['@']:
+            if self.bot.nick in self.users.modes["@"]:
                 self.setup_lobby()
                 break
 
 
 def main():
-    password = os.getenv('BOTPSWD')
+    password = os.getenv("BOTPSWD")
     config = dict(
-        nick='hitlair', autojoins=[CHANNEL],
-        host='chat.freenode.net', port=6697, ssl=True,
-        password=f'hitlair:{password}',
-        includes=[
-            'irc3.plugins.core',
-            'irc3.plugins.command',
-            SELF_MODULE,
-        ]
+        nick="hitlair",
+        autojoins=[CHANNEL],
+        host="chat.freenode.net",
+        port=6697,
+        ssl=True,
+        password=f"hitlair:{password}",
+        includes=["irc3.plugins.core", "irc3.plugins.command", SELF_MODULE,],
     )
     bot = irc3.IrcBot.from_config(config)
     bot.run(forever=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

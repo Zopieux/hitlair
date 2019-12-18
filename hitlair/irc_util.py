@@ -2,7 +2,7 @@ def encode_modes(target, *modes):
     def key(i):
         if isinstance(i, str):
             name = i
-            val = ''
+            val = ""
         else:
             name, val = i
 
@@ -10,16 +10,18 @@ def encode_modes(target, *modes):
 
     m = tuple(sorted(modes, key=key))
     if not m:
-        return ''
+        return ""
 
     j = 0
     while j < len(m):
         cur_sign = None
-        modenames = ''
+        modenames = ""
         modevals = []
 
         i = 0
-        while len(target + modenames + ' '.join(modevals)) < 450 and i < 4 and j < len(m):
+        while (
+            len(target + modenames + " ".join(modevals)) < 450 and i < 4 and j < len(m)
+        ):
             _, name, val = key(m[j])
             if cur_sign != name[0]:
                 cur_sign = name[0]
@@ -38,10 +40,10 @@ def parse_modes(server_config, modestr, targets):
     i = 0
     out = []
 
-    param_modes, list_modes, param_set_modes, *_ = server_config['CHANMODES'].split(',')
+    param_modes, list_modes, param_set_modes, *_ = server_config["CHANMODES"].split(",")
 
     for char in modestr:
-        if char in '+-':
+        if char in "+-":
             last = char
             continue
 
@@ -49,12 +51,12 @@ def parse_modes(server_config, modestr, targets):
             raise ValueError("Modes have to begin with + or -")
 
         param_modes = param_modes | list_modes
-        if last == '+':
+        if last == "+":
             param_modes |= param_set_modes
 
         if char in param_modes:
-            out.append((last == '+', char, targets[i]))
+            out.append((last == "+", char, targets[i]))
             i += 1
         else:
-            out.append((last == '+', char, None))
+            out.append((last == "+", char, None))
     return out

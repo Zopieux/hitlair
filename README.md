@@ -1,4 +1,4 @@
-# SIRCet Hitler
+# hitlair
 
 An IRC bot to play the [Secret Hitler](https://www.secrethitler.com/) game.
 

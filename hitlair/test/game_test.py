@@ -2,8 +2,8 @@ from typing import Type
 
 import pytest
 
-from hitler import game
-from hitler.game import Stage, IllegalState, Player, InvalidAction, Policy
+from hitlair import game
+from hitlair.game import Stage, IllegalState, Player, InvalidAction, Policy
 
 
 def has_one_event_of_type(events, cls: Type[game.Event]):
@@ -57,8 +57,10 @@ def test_chancellor_nomination_vote_fails(state: game.State, example_players):
     state.nominate_chancellor(chancellor)
     events, stage = state.advance()
 
-    assert get_event_of_type(events,
-                             game.PresidentNominates).candidate_chancellor == chancellor
+    assert (
+        get_event_of_type(events, game.PresidentNominates).candidate_chancellor
+        == chancellor
+    )
     with pytest.raises(IllegalState):
         state.advance()
 
@@ -76,8 +78,7 @@ def test_chancellor_nomination_vote_fails(state: game.State, example_players):
     assert game.PresidentChanges(president, example_players[1]) in events
 
 
-def test_chancellor_nomination_vote_succeeds(state: game.State,
-                                             example_players):
+def test_chancellor_nomination_vote_succeeds(state: game.State, example_players):
     president, chancellor, *_ = example_players
     state._skip_lobby_for_testing(example_players, president)
     assert state.stage is Stage.nominate_chancellor
@@ -104,12 +105,14 @@ def test_legislate_and_enact(state, example_players):
     assert state.stage is Stage.legislate
 
     state._set_next_policies_for_testing(
-        [Policy.fascist, Policy.fascist, Policy.fascist])
+        [Policy.fascist, Policy.fascist, Policy.fascist]
+    )
     with pytest.raises(InvalidAction):
         state.president_discards(Policy.liberal)
 
     state._set_next_policies_for_testing(
-        [Policy.liberal, Policy.liberal, Policy.fascist])
+        [Policy.liberal, Policy.liberal, Policy.fascist]
+    )
     state.president_discards(Policy.liberal)
     assert state.policy_deck[-2:] == [Policy.liberal, Policy.fascist]
 
@@ -155,8 +158,9 @@ def test_fascists_win_by_policies(state, example_players):
     assert game.FascistsWin() in events
 
 
-def test_fascists_cannot_win_by_hitler_chancellor_whithout_3_policies(state,
-                                                                      example_players):
+def test_fascists_cannot_win_by_hitler_chancellor_whithout_3_policies(
+    state, example_players
+):
     president, chancellor, *_, hitler = example_players
     state._skip_lobby_for_testing(example_players, president)
     state._skip_chancellor_election_for_testing(chancellor)
@@ -251,11 +255,9 @@ def test_executive_action_kill(state, example_players):
     assert stage is Stage.nominate_chancellor
 
 
-def test_executive_action_investigate(state, example_players,
-                                      more_example_players):
+def test_executive_action_investigate(state, example_players, more_example_players):
     president, chancellor, *_ = example_players
-    state._skip_lobby_for_testing(example_players + more_example_players,
-                                  president)
+    state._skip_lobby_for_testing(example_players + more_example_players, president)
     state._skip_chancellor_election_for_testing(chancellor)
     # Next fascist policy is investigate.
     state._set_policy_board_for_testing(1, 1)
@@ -274,11 +276,11 @@ def test_executive_action_investigate(state, example_players,
     assert stage is Stage.nominate_chancellor
 
 
-def test_executive_action_special_election(state, example_players,
-                                           more_example_players):
+def test_executive_action_special_election(
+    state, example_players, more_example_players
+):
     president, chancellor, *_ = example_players
-    state._skip_lobby_for_testing(example_players + more_example_players,
-                                  president)
+    state._skip_lobby_for_testing(example_players + more_example_players, president)
     state._skip_chancellor_election_for_testing(chancellor)
     # Next fascist policy is special election.
     state._set_policy_board_for_testing(1, 2)

@@ -2,8 +2,17 @@ import enum
 import itertools
 import random
 from enum import auto
-from typing import List, Optional, Dict, Iterator, NamedTuple, Tuple, \
-    Iterable, Generator, Callable
+from typing import (
+    List,
+    Optional,
+    Dict,
+    Iterator,
+    NamedTuple,
+    Tuple,
+    Iterable,
+    Generator,
+    Callable,
+)
 
 # Keys are also the supported numbers of players.
 PLAYER_COUNT_TO_LIBERAL_COUNT = {
@@ -113,10 +122,9 @@ class ExecutiveAction(enum.Enum):
             4: cls.kill,
             5: cls.kill,
         }
-        return ({5: pc_5_6, 6: pc_5_6,
-                 7: pc_7_8, 8: pc_7_8,
-                 9: pc_9_10, 10: pc_9_10}[player_count]
-                .get(fascist_policy_count))
+        return {5: pc_5_6, 6: pc_5_6, 7: pc_7_8, 8: pc_7_8, 9: pc_9_10, 10: pc_9_10}[
+            player_count
+        ].get(fascist_policy_count)
 
     @classmethod
     def veto_available(cls, fascist_policy_count: int):
@@ -268,6 +276,7 @@ class State:
     Things that should remain global: players, dead_players, policy_deck, etc.
     Things that can go into temporary context-specific states: votes, veto, etc.
     """
+
     stage: Stage
     players: List[Player]
     player_cycle: Iterator[Player]
@@ -318,7 +327,7 @@ class State:
         if current_stage is not None and self.stage is not current_stage:
             raise IllegalState()
 
-        method_name = f'exit_{self.stage.name}'
+        method_name = f"exit_{self.stage.name}"
         method: Callable[[], Generator[Event]] = getattr(self, method_name)
         events = list(method())
 
@@ -369,8 +378,7 @@ class State:
         random.shuffle(self.players)
         hitler, *not_hitler = self.players
         hitler.role = Role.hitler
-        liberals, fascists = (not_hitler[:liberal_count],
-                              not_hitler[liberal_count:])
+        liberals, fascists = (not_hitler[:liberal_count], not_hitler[liberal_count:])
         for liberal in liberals:
             liberal.role = Role.liberal
         for fascist in fascists:
@@ -393,9 +401,11 @@ class State:
         self._ensure_stage(Stage.nominate_chancellor)
 
         # Term limit: cannot nominate former chancellor or former president.
-        if (chancellor == self.former_chancellor
-                or chancellor == self.former_president
-                or chancellor == self.president):
+        if (
+            chancellor == self.former_chancellor
+            or chancellor == self.former_president
+            or chancellor == self.president
+        ):
             raise InvalidAction()
 
         self.chancellor = chancellor
@@ -604,8 +614,7 @@ class State:
         # Uses the fact that the last player is the one investigated.
         # Convenient but I don't like it.
         # TODO: no check that someone was in fact investigated, trusting caller.
-        yield PresidentInvestigates(self.president,
-                                    self.investigated_players[-1])
+        yield PresidentInvestigates(self.president, self.investigated_players[-1])
         yield from self._next_president()
 
     # Stage: action_kill
@@ -726,8 +735,9 @@ class State:
                 yield StageChanges(Stage.lobby)
                 return
 
-            executive_action = ExecutiveAction.get(self.total_player_count,
-                                                   self.fascist_policies)
+            executive_action = ExecutiveAction.get(
+                self.total_player_count, self.fascist_policies
+            )
             if executive_action is ExecutiveAction.peek:
                 yield PresidentShallPeek(self.president)
                 yield StageChanges(Stage.action_peek)
@@ -753,9 +763,12 @@ class State:
         yield from self._next_president()
 
     def _init_policy_deck(self):
-        self.policy_deck = list(itertools.chain(
-            (Policy.liberal for _ in range(LIBERAL_POLICY_COUNT)),
-            (Policy.fascist for _ in range(FASCIST_POLICY_COUNT))))
+        self.policy_deck = list(
+            itertools.chain(
+                (Policy.liberal for _ in range(LIBERAL_POLICY_COUNT)),
+                (Policy.fascist for _ in range(FASCIST_POLICY_COUNT)),
+            )
+        )
         random.shuffle(self.policy_deck)
 
     # Test helpers, should not be used outside of tests.
@@ -782,10 +795,13 @@ class State:
     def _force_failed_election(self):
         self.stage = Stage.nominate_chancellor
         # Random player.
-        banned = {self.former_chancellor, self.chancellor,
-                  self.former_president, self.president}
-        self.nominate_chancellor(next((p for p in self.players
-                                       if p not in banned)))
+        banned = {
+            self.former_chancellor,
+            self.chancellor,
+            self.former_president,
+            self.president,
+        }
+        self.nominate_chancellor(next((p for p in self.players if p not in banned)))
         self.advance()
         for p in self.players:
             self.record_vote(p, False)
@@ -796,8 +812,9 @@ class State:
 
         self.policy_deck.extend(next_policies)
 
-    def _set_policy_board_for_testing(self, liberal_policies: int,
-                                      fascist_policies: int):
+    def _set_policy_board_for_testing(
+        self, liberal_policies: int, fascist_policies: int
+    ):
         self.liberal_policies = liberal_policies
         self.fascist_policies = fascist_policies
 

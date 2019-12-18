@@ -1,12 +1,11 @@
 import pytest
 
-from hitler.game import Player, Role
+from hitlair.game import Player, Role
 
 
 @pytest.fixture
 def example_players():
-    players = [Player(p) for p in
-               ["zopieux", "delroth", "halfr", "spider", "sophie"]]
+    players = [Player(p) for p in ["zopieux", "delroth", "halfr", "spider", "sophie"]]
     for p in players[:3]:
         p.role = Role.liberal
     players[3].role = Role.fascist
@@ -24,5 +23,6 @@ def more_example_players():
 
 @pytest.fixture
 def state():
-    from hitler import game
+    from hitlair import game
+
     return game.State()
